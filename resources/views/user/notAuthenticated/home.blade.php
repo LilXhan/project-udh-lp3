@@ -1,6 +1,5 @@
 @extends('layouts.app')
 @section('content')
-
     @if( $user )
         <h1 class="text-center">Bienvenido {{ $user['name'] }}</h1>
     @else
