@@ -17,18 +17,16 @@ class HabitoController extends Controller
         $user = Auth::user();
 
         if ($user) {
-            $habitos = Habito::where('user_id', '=', $user['id'])->first();
+            $habitos = Habito::where('user_id', $user->id)->with(['alimento', 'actividad'])->get();
             return view('user.authenticated.habito.mostrar', [
-                'habitos' => $habitos
+                'habitos' => $habitos,
+                'user' => $user
             ]);
         }
-
+        
         return redirect('login');
     }
 
-    /**
-     * Show the form for creating a new resource.
-     */
     public function create()
     {
         $actividades = Actividade::all();
@@ -46,9 +44,6 @@ class HabitoController extends Controller
         return redirect(to: 'login');
     }
 
-    /**
-     * Store a newly created resource in storage.
-     */
     public function store(Request $request)
     {
         $habito = new Habito();
@@ -60,35 +55,40 @@ class HabitoController extends Controller
         return redirect('habitos');
     }   
 
-    /**
-     * Display the specified resource.
-     */
-    public function show(string $id)
-    {
-        //
-    }
-
-    /**
-     * Show the form for editing the specified resource.
-     */
     public function edit(string $id)
     {
-        //
+        $habito = Habito::findOrFail($id);
+        $actividades = Actividade::all();
+        $alimentos = Alimento::all();
+        $user = Auth::user();
+
+        if ($user) {
+            return view('user.authenticated.habito.editar', [
+                'habito' => $habito,
+                'actividades' => $actividades,
+                'alimentos' => $alimentos,
+                'user' => $user
+            ]);
+        }
+
+        return redirect('login');
     }
 
-    /**
-     * Update the specified resource in storage.
-     */
     public function update(Request $request, string $id)
     {
-        //
+        $habito = Habito::findOrFail($id);
+        $habito->user_id = $request->input('user_id');
+        $habito->alimento_id = $request->input('alimento_id');
+        $habito->actividad_id = $request->input('actividad_id');
+        $habito->valor = $request->input('valor');
+        $habito->save();
+        return redirect('habitos');
     }
 
-    /**
-     * Remove the specified resource from storage.
-     */
     public function destroy(string $id)
     {
-        //
+        $habito = Habito::findOrFail($id);
+        $habito->delete();
+        return redirect('habitos');
     }
 }
